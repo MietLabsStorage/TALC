@@ -1,3 +1,3 @@
 # TALC
-Theory of algorithmic languages and compilers
+Theory of algorithmic languages and compilers      
 MIET labs
