@@ -94,6 +94,15 @@ namespace ReversePolishNotation.ConvertToRPN
             {
                 if (OperationHelper.IsOperation(sym.ToString()))
                 {
+                    if ((sym.ToString() == OperationHelper.Convert(Operation.Substract)
+                         || sym.ToString() == OperationHelper.Convert(Operation.Sum))
+                         && stringBuilder.Length > 1
+                         && stringBuilder[stringBuilder.Length - 1].ToString() == "e")
+                    {
+                        stringBuilder.Append($"{sym}");
+                        continue;
+                    }
+
                     // (-1 -> (0-1 
                     // 2 -1 -> 2 0-1
                     if (sym.ToString() == OperationHelper.Convert(Operation.Substract)
@@ -105,7 +114,7 @@ namespace ReversePolishNotation.ConvertToRPN
                         stringBuilder.Append($" 0 {OperationHelper.Convert(Operation.Substract)} ");
                         continue;
                     }
-                    
+
                     // 1*-1 -> exception
                     if (sym.ToString() == OperationHelper.Convert(Operation.Substract)
                         && stringBuilder.Length > 1
@@ -130,12 +139,13 @@ namespace ReversePolishNotation.ConvertToRPN
 
                     // -1 -> 0-1
                     // ,-1 -> ,0-1
-                    if ((sym.ToString() == OperationHelper.Convert(Operation.Substract)
+                    if (((sym.ToString() == OperationHelper.Convert(Operation.Substract)
+                          || sym.ToString() == OperationHelper.Convert(Operation.Sum))
                          && stringBuilder.Length == 0) 
                         || (stringBuilder.Length > 1 
                             && stringBuilder[stringBuilder.Length - 2].ToString() == Separator))
                     {
-                        stringBuilder.Append($" 0 {OperationHelper.Convert(Operation.Substract)} ");
+                        stringBuilder.Append($" 0 {sym} ");
                         continue;
                     }
 
@@ -149,12 +159,6 @@ namespace ReversePolishNotation.ConvertToRPN
                         continue;
                     }
 
-                    if(stringBuilder.Length > 1
-                       && stringBuilder[stringBuilder.Length - 2].ToString() == OperationHelper.Convert(Operation.CloseBracket))
-                    {
-                        stringBuilder.Append($" * {sym} ");
-                        continue;
-                    }
                     stringBuilder.Append(sym);
                 }
             }
@@ -170,12 +174,22 @@ namespace ReversePolishNotation.ConvertToRPN
 
         private static void CheckExpressionByIrrelevantSymbols(List<string> expressions)
         {
+            for (int i = 1; i < expressions.Count - 1; i++)
+            {
+                if (expressions[i - 1] == OperationHelper.Convert(Operation.CloseBracket)
+                    && expressions[i + 1] == OperationHelper.Convert(Operation.CloseBracket)
+                    && expressions[i] == OperationHelper.Convert(Operation.Multiply))
+                {
+                    expressions[i] = Separator;
+                }
+            }
+
             var ops = expressions
                 .Where(_ => OperationHelper.IsOperation(_.ToString()) && !OperationHelper.IsBracket(_.ToString()))
                 .ToList();
 
             var nums = expressions
-                .Where(_ => !OperationHelper.IsOperation(_.ToString()))
+                .Where(_ => !OperationHelper.IsOperation(_.ToString()) && _ != Separator)
                 .ToList();
 
             if (ops.Count() != nums.Count() - 1)
@@ -240,7 +254,8 @@ namespace ReversePolishNotation.ConvertToRPN
             for(int i = 1; i < expressions.Count; i++)
             {
                 if (double.TryParse(expressions[i], NumberStyles.Any, new NumberFormatInfo(), out var n)
-                      && double.TryParse(expressions[i - 1], NumberStyles.Any, new NumberFormatInfo(), out var o))
+                      && (double.TryParse(expressions[i - 1], NumberStyles.Any, new NumberFormatInfo(), out var o)
+                      || expressions[i - 1] == OperationHelper.Convert(Operation.CloseBracket)))
                 {
                     throw new Exception("Not arithmetic expression");
                 }
@@ -249,7 +264,7 @@ namespace ReversePolishNotation.ConvertToRPN
 
         private static void RemoveSeparators(ref List<string> expressions)
         {
-            expressions.Remove(Separator);
+            expressions.RemoveAll(_ => _ == Separator);
         }
     }
 }

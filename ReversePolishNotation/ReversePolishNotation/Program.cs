@@ -44,6 +44,7 @@ namespace ReversePolishNotation
                 "-1+1",
                 "(1+1)(2+2)",
                 "(1 + 2) 2 + ",
+                "1 + 2 2 +",
                 "(1 + 2) 2  ",
                 "1 + 2 + ",
                 "1 + 2 2 ",
@@ -58,7 +59,19 @@ namespace ReversePolishNotation
                 "+",
                 "-21 2+1 +",
                 "2(1+3)",
-                "3"
+                "3",
+                "log(8, log(log(16, 2),   log(  4,  2)  ))",
+                "1e1",
+                "1e-1",
+                "1e - 1",
+                "1e-0.1",
+                "1e+1",
+                "1e(-1)",
+                "+1",
+                "-1",
+                ".5",
+                "5.",
+                "e2",
             };
 
             foreach (var str in strList)
