@@ -72,6 +72,10 @@ namespace ReversePolishNotation
                 ".5",
                 "5.",
                 "e2",
+                "(23/38-6)*3.5-6",
+                "-5+(-3)b",
+                "1+f^0",
+                "log(log(log(101,2),10),100)"
             };
 
             foreach (var str in strList)
