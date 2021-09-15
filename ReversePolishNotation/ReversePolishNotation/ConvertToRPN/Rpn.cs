@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -60,6 +60,10 @@ namespace ReversePolishNotation.ConvertToRPN
                         }
                     }
                     stack.Pop();
+                    if(stack.Count!=0 && stack.Peek() == OperationHelper.Convert(Operation.UserOperation))
+                    {
+                        rpnStr.Add(stack.Pop());
+                    }
                     continue;
                 }
 
@@ -108,7 +112,7 @@ namespace ReversePolishNotation.ConvertToRPN
                     if (sym.ToString() == OperationHelper.Convert(Operation.Substract)
                         && stringBuilder.Length > 1
                         && (stringBuilder[stringBuilder.Length - 2].ToString() == OperationHelper.Convert(Operation.OpenBracket) 
-                            || char.IsDigit(stringBuilder[stringBuilder.Length - 2])
+                            /*|| !char.IsDigit(stringBuilder[stringBuilder.Length - 2])*/
                             ))
                     {
                         stringBuilder.Append($" 0 {OperationHelper.Convert(Operation.Substract)} ");
@@ -192,11 +196,6 @@ namespace ReversePolishNotation.ConvertToRPN
                 .Where(_ => !OperationHelper.IsOperation(_.ToString()) && _ != Separator)
                 .ToList();
 
-            if (ops.Count() != nums.Count() - 1)
-            {
-                throw new Exception("Invalid count of nums and operations");
-            }
-
             foreach (var num in nums)
             {
                 if (!double.TryParse(num, NumberStyles.Any, new NumberFormatInfo(), out var n))
@@ -204,6 +203,12 @@ namespace ReversePolishNotation.ConvertToRPN
                     throw new Exception("Has non-number and non-operation");
                 }
             }
+
+            if (ops.Count() != nums.Count() - 1)
+            {
+                throw new Exception("Invalid count of nums and operations");
+            }
+            
         }
 
         private static void CheckStringExpressionByBrackets(string expression)
