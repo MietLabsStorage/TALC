@@ -11,7 +11,7 @@ namespace FiniteStateMachine
     public class FiniteStateMachine
     {
         private readonly HashSet<string> _startState = new HashSet<string>() {"q0"};
-        private readonly string _endState = "f0";
+        private readonly string _endState = "f";
         private FiniteStateDictionary _stateTable;
 
         public bool NeedDetermine { get; private set; } = false;
@@ -55,19 +55,21 @@ namespace FiniteStateMachine
             if (NeedDetermine)
             {
                 Console.WriteLine("Not determined");
-                Console.WriteLine("New state table:");
-                foreach (var obj in _stateTable)
-                {
-                    var transitions = (KeyValuePair<HashSet<string>, List<KeyValuePair<char, HashSet<string>>>>)obj;
-                    foreach (var transition in transitions.Value)
-                    {
-                        Console.WriteLine($"{"{"}{transitions.Key.ToString<string>()}{"}"} {transition.Key} -> {"{"}{transition.Value.ToString<string>()}{"}"}");
-                    }
-                }
             }
             else
             {
                 Console.WriteLine("Determined");
+            }
+
+            string str = NeedDetermine ? "New state table:" : "State table";
+            Console.WriteLine(str);
+            foreach (var obj in _stateTable)
+            {
+                var transitions = (KeyValuePair<HashSet<string>, List<KeyValuePair<char, HashSet<string>>>>)obj;
+                foreach (var transition in transitions.Value)
+                {
+                    Console.WriteLine($"{"{"}{transitions.Key.ToString<string>()}{"}"} {transition.Key} -> {"{"}{transition.Value.ToString<string>()}{"}"}");
+                }
             }
             Console.WriteLine("------------------------------------------------");
         }
@@ -89,7 +91,8 @@ namespace FiniteStateMachine
                 }
             }
 
-            return currentState?.Contains(_endState) ?? false;
+            //return currentState?.Contains(_endState) ?? false;
+            return currentState == null ? false : currentState.Any(_ => _.StartsWith(_endState));
         }
 
         private void Determine()
