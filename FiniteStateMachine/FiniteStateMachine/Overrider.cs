@@ -10,18 +10,13 @@ namespace FiniteStateMachine
     {
         public static string ToString<T>(this HashSet<T> hs)
         {
-            string str = "";
+            StringBuilder str = new StringBuilder(" ");
             foreach (var s in hs)
             {
-                str += s;
+                str.Append($"{s} ");
             }
 
-            return str;
-        }
-
-        public static bool Equals(this HashSet<string> hs, object obj)
-        {
-            return !hs.Except(obj as HashSet<string>).Any();
+            return str.ToString();
         }
     }
 }

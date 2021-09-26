@@ -14,10 +14,13 @@ namespace FiniteStateMachine
         private readonly string _endState = "f0";
         private FiniteStateDictionary _stateTable;
 
+        public bool NeedDetermine { get; private set; } = false;
+
         public FiniteStateMachine()
         {
             _stateTable = new FiniteStateDictionary();
             var stateTable = File.ReadAllLines("StateTable.txt");
+            Console.WriteLine($"Read {stateTable.Length} rows");
 
             foreach (var transition in stateTable)
             {
@@ -42,12 +45,31 @@ namespace FiniteStateMachine
                         if (!_stateTable.ContainsKey(transition.Value))
                         {
                             Determine();
+                            NeedDetermine = true;
                             break;
                         }
                     }
                 }
             }
 
+            if (NeedDetermine)
+            {
+                Console.WriteLine("Not determined");
+                Console.WriteLine("New state table:");
+                foreach (var obj in _stateTable)
+                {
+                    var transitions = (KeyValuePair<HashSet<string>, List<KeyValuePair<char, HashSet<string>>>>)obj;
+                    foreach (var transition in transitions.Value)
+                    {
+                        Console.WriteLine($"{"{"}{transitions.Key.ToString<string>()}{"}"} {transition.Key} -> {"{"}{transition.Value.ToString<string>()}{"}"}");
+                    }
+                }
+            }
+            else
+            {
+                Console.WriteLine("Determined");
+            }
+            Console.WriteLine("------------------------------------------------");
         }
 
         public bool Run(string text)
@@ -56,19 +78,18 @@ namespace FiniteStateMachine
             foreach (var currentSym in text)
             {
                 var key = currentState;
-                if (_stateTable.ContainsKey(key))
+                if (key != null && _stateTable.ContainsKey(key))
                 {
                     currentState = _stateTable.NewState(key, currentSym);
-                    _ = currentState ?? throw new Exception($"Find symbol ({currentSym}) or state ({currentState}) is not contained in state table");
+                    //_ = currentState ?? throw new Exception($"Find symbol ({currentSym}) or state is not contained in state table");
                 }
                 else
                 {
-                    throw new Exception($"Find symbol ({currentSym}) or state ({currentState}) is not contained in state table");
+                    return false;
                 }
-
             }
 
-            return currentState.Contains(_endState);
+            return currentState?.Contains(_endState) ?? false;
         }
 
         private void Determine()

@@ -10,23 +10,6 @@ namespace FiniteStateMachine
     {
         static void Main(string[] args)
         {
-            /*var machine = new FiniteStateMachine();
-            List<string> texts = new List<string>()
-            {
-                "a0", "a0000", "a", "b000", "b0", "ab", "ba", "0"
-            };
-
-            foreach (var text in texts)
-            {
-                try
-                {
-                    Console.WriteLine($"{text}: {machine.Run(text)}");
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine($"{text}: {e.Message}");
-                }
-            }*/
             FiniteStateMachine machine = null;
             try
             {
@@ -39,6 +22,7 @@ namespace FiniteStateMachine
 
             while (true)
             {
+                Console.WriteLine("Write line:");
                 var text = Console.ReadLine();
                 try
                 {
@@ -48,6 +32,7 @@ namespace FiniteStateMachine
                 {
                     Console.WriteLine($"{text}: {e.Message}");
                 }
+                Console.WriteLine();
             }
         }
     }
