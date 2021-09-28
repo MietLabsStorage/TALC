@@ -35,22 +35,7 @@ namespace FiniteStateMachine
             }
 
             _stateTable.SynchronizedDict();
-            foreach (var obj in _stateTable)
-            {
-                var transitions = (KeyValuePair<HashSet<string>, List<KeyValuePair<char, HashSet<string>>>>)obj;
-                foreach (var transition in transitions.Value)
-                {
-                    if (transition.Value.Count != 1)
-                    {
-                        if (!_stateTable.ContainsKey(transition.Value))
-                        {
-                            Determine();
-                            NeedDetermine = true;
-                            break;
-                        }
-                    }
-                }
-            }
+            Determine();
 
             if (NeedDetermine)
             {
@@ -97,6 +82,31 @@ namespace FiniteStateMachine
 
         private void Determine()
         {
+            bool notTryAgain = false;
+            while (!notTryAgain)
+            {
+                notTryAgain = true;
+                foreach (var obj in _stateTable)
+                {
+                    var transitions = (KeyValuePair<HashSet<string>, List<KeyValuePair<char, HashSet<string>>>>)obj;
+                    foreach (var transition in transitions.Value)
+                    {
+                        if (transition.Value.Count != 1)
+                        {
+                            if (!_stateTable.ContainsKey(transition.Value))
+                            {
+                                TryDetermine();
+                                notTryAgain = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void TryDetermine()
+        {
             var stateTable = new FiniteStateDictionary(_stateTable);
             foreach (var obj in _stateTable)
             {
@@ -125,23 +135,7 @@ namespace FiniteStateMachine
             }
 
             _stateTable = new FiniteStateDictionary(stateTable);
-
             _stateTable.SynchronizedDict();
-            foreach (var obj in _stateTable)
-            {
-                var transitions = (KeyValuePair<HashSet<string>, List<KeyValuePair<char, HashSet<string>>>>)obj;
-                foreach (var transition in transitions.Value)
-                {
-                    if (transition.Value.Count != 1)
-                    {
-                        if (!_stateTable.ContainsKey(transition.Value))
-                        {
-                            Determine();
-                            break;
-                        }
-                    }
-                }
-            }
         }
 
         private KeyValuePair<KeyValuePair<string, char>, string> ParsedTransition(string transition)
