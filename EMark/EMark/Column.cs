@@ -10,21 +10,14 @@ namespace EMark
     {
         public Column(
             Block parent,
-            Valign? valign,
-            Halign? halign,
-            int? textColor,
-            int? bgColor,
-            int? width
-        )
+            int width,
+            Valign? valign = null,
+            Halign? halign = null,
+            int? textColor = null,
+            int? bgColor = null
+        ): base(parent, valign: valign, halign: halign, textColor: textColor, bgColor: bgColor, height: null, width: width)
         {
-            parent = parent ?? new Block();
 
-            Valign = valign ?? parent.Valign;
-            Halign = halign ?? parent.Halign;
-            TextColor = textColor ?? parent.TextColor;
-            BgColor = bgColor ?? parent.BgColor;
-            Height = parent.Height;
-            Width = width ?? parent.Width;
         }
     }
 }

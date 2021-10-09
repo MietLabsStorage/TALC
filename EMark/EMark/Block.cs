@@ -15,6 +15,7 @@ namespace EMark
         public int Height { get; protected set; }
         public int Width { get; protected set; }
         public List<Block> Children { get; protected set; }
+        public Block Parent { get; protected set; }
 
         public Block()
         {
@@ -25,20 +26,20 @@ namespace EMark
             Height = 24;
             Width = 80;
             Children = new List<Block>();
+            Parent = null;
         }
 
         public Block(
             Block parent,
-            Valign? valign,
-            Halign? halign,
-            int? textColor,
-            int? bgColor,
-            int? height,
-            int? width
+            Valign? valign = null,
+            Halign? halign = null,
+            int? textColor = null,
+            int? bgColor = null,
+            int? height = null,
+            int? width = null
             )
         {
-            parent = parent ?? new Block();
-
+            Parent = parent;
             Valign = valign ?? parent.Valign;
             Halign = halign ?? parent.Halign;
             TextColor = textColor ?? parent.TextColor;
