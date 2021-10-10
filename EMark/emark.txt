@@ -1,5 +1,5 @@
-<block>
-	<column color:1>
+<block valign=top>
+	<column>
 		<row>
 			<block>
 				<row>

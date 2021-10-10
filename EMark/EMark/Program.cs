@@ -10,7 +10,8 @@ namespace EMark
     {
         static void Main(string[] args)
         {
-            new Processor().ParseToList(@"C:\Users\Admin\OneDrive\Рабочий стол\7 семестр\TALC\EMark\emark.txt");
+             Block block = new Processor().TryParseToBlock(new Processor().ParseToList(@"C:\Users\Admin\OneDrive\Рабочий стол\7 семестр\TALC\EMark\emark.txt"));
+             Console.WriteLine(block);
         }
     }
 }
