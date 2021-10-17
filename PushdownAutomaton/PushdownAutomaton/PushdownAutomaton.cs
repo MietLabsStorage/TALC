@@ -80,6 +80,35 @@ namespace PushdownAutomaton
             _transactions.Add(new KeyValuePair<TransactionArg, List<TransactionVal>>(new TransactionArg { S = "s0", P = Eof.ToString(), H = Eof }, new List<TransactionVal>() { new TransactionVal { S = "s0", H = Eof.ToString() } }));
         }
 
+        public void ShowGlobals()
+        {
+            Console.Write($"P: ");
+            foreach(var elem in _globalP)
+            {
+                Console.Write($"{elem} ");
+            }
+
+            Console.Write($"Z: ");
+            foreach (var elem in _globalZ)
+            {
+                Console.Write($"{elem} ");
+            }
+
+            Console.Write($"S: ");
+            foreach (var elem in _globalS)
+            {
+                Console.Write($"{elem} ");
+            }
+
+            Console.Write($"F: ");
+            foreach (var elem in _globalF)
+            {
+                Console.Write($"{elem} ");
+            }
+
+            Console.WriteLine();
+        }
+
         public void CheckStr(string str)
         {
             _history = new List<string>();
@@ -87,14 +116,15 @@ namespace PushdownAutomaton
             _stack.Add(Eof);
             _stack.Add(_globalZ.First(_ => !_globalP.Contains(_)));
 
-            //try
-            //{
+            try
+            {
                 string newStr = new string(str.ToArray());
                 List<char> newStack = new List<char>(_stack);
                 List<string> newHistory = new List<string>(_history);
 
                 var processes = new List<Process>(){ new Process { Str = newStr, History = newHistory, Stack = newStack, Num = 1 }};
 
+                int count = 0;
                 while (true)
                 {
                     _history = Step(ref processes);
@@ -102,6 +132,19 @@ namespace PushdownAutomaton
                     {
                         break;
                     }
+
+                    if(processes.Count > 100)
+                    {
+                        Console.WriteLine($"Processed {processes.Count} branches...");
+                    }
+
+                    if(count > 100000)
+                    {
+                        Console.WriteLine("PROBABLY SMTH BAD");
+                        return;
+                    }
+
+                    count++;
                 }
 
                 Console.WriteLine("-----SUCCES------");
@@ -111,14 +154,12 @@ namespace PushdownAutomaton
                     Console.WriteLine(rec);
                 }
 
-           // }
+            }
 
-            /*catch (Exception e)
+            catch (Exception e)
             {
-                Console.WriteLine(e);
-
                 Console.WriteLine("BAD STRING");
-            }*/
+            }
         }
 
         private List<string> Step(ref List<Process> processes)

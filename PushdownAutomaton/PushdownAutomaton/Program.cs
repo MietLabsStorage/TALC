@@ -10,9 +10,16 @@ namespace PushdownAutomaton
     {
         static void Main(string[] args)
         {
-            var pushdownAutomaton = new PushdownAutomaton(@"C:\Users\Admin\OneDrive\Рабочий стол\7 семестр\ТАЯК\Laba3\test3.txt");
+            var pushdownAutomaton = new PushdownAutomaton(@"grammatic.txt");
+            Console.WriteLine("Transactions:");
             pushdownAutomaton.ShowTransactions();
-            pushdownAutomaton.CheckStr("a+a*a");
+            pushdownAutomaton.ShowGlobals();
+            //pushdownAutomaton.CheckStr("a+a*a");
+            while (true)
+            {
+                Console.WriteLine("Write str: ");
+                pushdownAutomaton.CheckStr(Console.ReadLine());
+            }
             Console.ReadKey();
         }
     }
