@@ -45,18 +45,13 @@
   <ItemGroup>
     <Compile Include="Blocks\Block.cs" />
     <Compile Include="Blocks\Column.cs" />
-    <Compile Include="Blocks\FakeBlocks\FakeBlock.cs" />
-    <Compile Include="Blocks\FakeBlocks\FakeColumn.cs" />
-    <Compile Include="Blocks\FakeBlocks\FakeEBlock.cs" />
-    <Compile Include="Blocks\FakeBlocks\FakeRow.cs" />
-    <Compile Include="Content.cs" />
+    <Compile Include="Blocks\Content.cs" />
     <Compile Include="Blocks\EBlock.cs" />
     <Compile Include="EMarkException.cs" />
     <Compile Include="Halign.cs" />
-    <Compile Include="Processor.cs" />
+    <Compile Include="PixelText.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Regexps.cs" />
     <Compile Include="Blocks\Row.cs" />
     <Compile Include="Valign.cs" />
   </ItemGroup>

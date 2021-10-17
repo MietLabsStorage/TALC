@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace EMark
 {
@@ -10,13 +11,10 @@ namespace EMark
     {
         public Row(
             Block parent,
-            int? height,
-            Valign? valign = null,
-            Halign? halign = null,
-            int? textColor = null,
-            int? bgColor = null
-                ): base(parent, valign: valign, halign: halign, textColor: textColor, bgColor: bgColor, height: height, width: null)
+            XmlElement xml
+            ) : base(parent, xml)
         {
+
         }
     }
 }

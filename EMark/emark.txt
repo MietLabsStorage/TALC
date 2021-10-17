@@ -1,20 +1,8 @@
-<block valign=top>
-	<column>
-		<row>
-			<block>
-				<row>
-<column> A </column>
-<column> B </column>
-				</row>
-<column> C </column>
-<column> D </column>
-				<row>
-				</row>
-			</block>
-		</row>
-
-		<row> F </row>
-	</column>
-	
-	<column> E	</column>
+<block width="10" height="10">
+<block width="5" height="10">
+qqqq
+</block>
+<block width="5" height="10">
+wwww
+</block>
 </block>
