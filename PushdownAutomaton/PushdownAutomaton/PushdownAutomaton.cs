@@ -7,6 +7,14 @@ using System.Threading.Tasks;
 
 namespace PushdownAutomaton
 {
+    public class Process
+    {
+        public string Str { get; set; }
+        public List<char> Stack { get; set; }
+        public List<string> History { get; set; }
+        public int Num { get; set; }
+    }
+
     public class TransactionArg
     {
         public string S { get; set; }
@@ -79,19 +87,22 @@ namespace PushdownAutomaton
             _stack.Add(Eof);
             _stack.Add(_globalZ.First(_ => !_globalP.Contains(_)));
 
-            var record = new StringBuilder($"{"s0"}, {str}, ");
-            foreach(var sym in _stack)
-            {
-                record.Append(sym);
-            }
-            _history.Add(record.ToString());
-
-            try
-            {
+            //try
+            //{
                 string newStr = new string(str.ToArray());
                 List<char> newStack = new List<char>(_stack);
                 List<string> newHistory = new List<string>(_history);
-                _history = Step(ref newStr, ref newStack, ref newHistory);
+
+                var processes = new List<Process>(){ new Process { Str = newStr, History = newHistory, Stack = newStack, Num = 1 }};
+
+                while (true)
+                {
+                    _history = Step(ref processes);
+                    if(_history != null)
+                    {
+                        break;
+                    }
+                }
 
                 Console.WriteLine("-----SUCCES------");
                 Console.WriteLine("history:");
@@ -100,77 +111,77 @@ namespace PushdownAutomaton
                     Console.WriteLine(rec);
                 }
 
-            }
+           // }
 
-            catch (Exception e)
+            /*catch (Exception e)
             {
                 Console.WriteLine(e);
 
                 Console.WriteLine("BAD STRING");
-            }
+            }*/
         }
 
-        private List<string> Step(ref string str, ref List<char> stack, ref List<string> history)
+        private List<string> Step(ref List<Process> processes)
         {
-            if(string.IsNullOrEmpty(str) && stack.Count == 1 && stack.Last() == Eof)
-            {
-                return history;
-            }
+            var newProcesses = new List<Process>(processes);
 
-            if (string.IsNullOrEmpty(str) || (stack.Count == 1 && stack.Last() == Eof))
+            foreach (var process in processes)
             {
-                throw new Exception();
-            }
-
-            if (IsNonTerminal(stack.Last()))
-            {
-                var tmpStack = new List<char>(stack);
-                var transaction = _transactions.First(_ => _.Key.H == tmpStack.Last());
-                foreach(var val in transaction.Value)
+                var record = new StringBuilder($"{"s0"}, {process.Str}, ");
+                foreach (var sym in process.Stack)
                 {
-                    stack.RemoveAt(stack.Count - 1);
-                    string newStr = new string(str.ToArray());
-                    List<char> newStack = new List<char>(stack);
-                    foreach(var sym in val.H)
-                    {
-                        newStack.Add(sym);
-                    }
-                    List<string> newHistory = new List<string>(history);
-                    try
-                    {
-                        Step(ref newStr, ref newStack, ref newHistory);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                    }
+                    record.Append(sym);
                 }
-            }
-            else
-            {
-                if (str.First() == stack.Last())
+                process.History.Add(record.ToString());
+
+                if (string.IsNullOrEmpty(process.Str) && process.Stack.Count == 1 && process.Stack.Last() == Eof)
                 {
-                    str = str.Remove(0, 1);
-                    stack.RemoveAt(stack.Count - 1);
-                    string newStr = new string(str.ToArray());
-                    List<char> newStack = new List<char>(stack);
-                    List<string> newHistory = new List<string>(history);
-                    try
-                    {
-                        Step(ref newStr, ref newStack, ref newHistory);
-                    }
-                    catch(Exception e)
-                    {
-                        Console.WriteLine(e);
+                    return process.History;
+                }
+
+                if (string.IsNullOrEmpty(process.Str) || (process.Stack.Count == 1 && process.Stack.Last() == Eof))
+                {
+                    newProcesses.Remove(processes.First(_ => _.Num == process.Num));
+                }
+
+                if (IsNonTerminal(process.Stack.Last()))
+                {
+                    var tmpStack = new List<char>(process.Stack);
+                    var transaction = _transactions.First(_ => _.Key.H == tmpStack.Last());
+                    newProcesses.Remove(process);
+                    foreach (var val in transaction.Value)
+                    {                       
+                        string newStr = new string(process.Str.ToArray());
+                        List<char> newStack = new List<char>(process.Stack);
+                        newStack.RemoveAt(process.Stack.Count - 1);
+                        foreach (var sym in val.H)
+                        {
+                            newStack.Add(sym);
+                        }
+                        List<string> newHistory = new List<string>(process.History);
+
+                        newProcesses.Add(new Process { Str = newStr, History = newHistory, Stack = newStack, Num = processes.Last().Num++ });
                     }
                 }
                 else
                 {
-                    throw new Exception();
+                    if (process.Str.First() == process.Stack.Last())
+                    {
+                        process.Str = process.Str.Remove(0, 1);
+                        process.Stack.RemoveAt(process.Stack.Count - 1);
+                        string newStr = new string(process.Str.ToArray());
+                        List<char> newStack = new List<char>(process.Stack);
+                        List<string> newHistory = new List<string>(process.History);
+                    }
+                    else
+                    {
+                        newProcesses.Remove(processes.First(_ => _.Num == process.Num));
+                    }
                 }
             }
 
-            return history;
+            processes = new List<Process>(newProcesses);
+            return null;
         }
 
         public void ShowTransactions()
