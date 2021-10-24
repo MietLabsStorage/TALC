@@ -1,8 +1,0 @@
-<block width="10" height="10">
-<block width="5" height="10">
-qqqq
-</block>
-<block width="5" height="10">
-wwww
-</block>
-</block>

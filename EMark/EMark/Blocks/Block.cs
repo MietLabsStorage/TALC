@@ -13,8 +13,6 @@ namespace EMark
         public Block Parent { get; protected set; }
         public XmlElement Xml { get; protected set; }
 
-        public bool IsLast { get; set; }
-
         public Valign? Valign { get; protected set; }
         public Halign? Halign { get; protected set; }
         public int? TextColor { get; protected set; }
@@ -22,9 +20,11 @@ namespace EMark
         public int? Height { get; protected set; }
         public int? Width { get; protected set; }
 
-
+        public int Rows { get; protected set; }
+        public int Columns { get; protected set; }
         public int LastWidth => Width - Children.Sum(_ => _.Width) ?? 0;
         public int LastHeight => Height - Children.Sum(_ => _.Height) ?? 0;
+        public int Childs => Rows != 0 ? Rows : Columns != 0 ? Columns : 1;
 
         public Block()
         {
@@ -47,34 +47,36 @@ namespace EMark
             Parent = parent;
             Xml = xml;
 
-            Valign = XmlElementHelper.Valign(xml) ?? parent?.Valign;
-            Halign = XmlElementHelper.Halign(xml) ?? parent?.Halign;
-            TextColor = XmlElementHelper.TextColor(xml) ?? parent?.TextColor;
-            BgColor = XmlElementHelper.BgColor(xml) ?? parent?.BgColor;
+            Valign = XmlElementHelper.Valign(xml) ?? parent?.Valign ?? EMark.Valign.Top;
+            Halign = XmlElementHelper.Halign(xml) ?? parent?.Halign ?? EMark.Halign.Left;
+            TextColor = XmlElementHelper.TextColor(xml) ?? parent?.TextColor ?? 15;
+            BgColor = XmlElementHelper.BgColor(xml) ?? parent?.BgColor ?? 0;
+            Rows = XmlElementHelper.Rows(xml);
+            Columns = XmlElementHelper.Columns(xml);
 
-            var height = XmlElementHelper.Height(xml);
-            var width = XmlElementHelper.Width(xml);
+            var height = XmlElementHelper.Height(xml) ?? 0;
+            var width = XmlElementHelper.Width(xml) ?? 0;
 
             switch (this)
             {
-                case EBlock block:
-                    Height = (height < parent?.LastHeight ? height : parent?.LastHeight) ?? parent?.Height;
-                    Width = (width < parent?.LastWidth ? width : parent?.LastWidth) ?? parent?.Width;
+                case EBlock _:
+                    Height = parent?.Height ?? height;
+                    Width = parent?.Width ?? width;
                     break;
 
-                case Column block:
-                    Height = parent?.Height;
-                    Width = (width < parent?.LastWidth ? width : parent?.LastWidth) ?? parent?.Width;
+                case Column _:
+                    Height = parent?.Height ?? height; 
+                    Width = (parent.Children.Count == parent.Childs - 1) ? parent.LastWidth : width;
                     break;
 
-                case Row block:
-                    Height = (height < parent?.LastHeight ? height : parent?.LastHeight) ?? parent?.Height;
-                    Width = parent?.Width;
+                case Row _:
+                    Height = (parent.Children.Count == parent.Childs - 1) ? parent.LastHeight : height;
+                    Width = parent?.Width ?? width;
                     break;
 
-                case Content block:
-                    Height = parent?.Height;
-                    Width = parent?.Width;
+                case Content _:
+                    Height = parent?.Height ?? height;
+                    Width = parent?.Width ?? width;
                     break;
             }
 
@@ -82,11 +84,6 @@ namespace EMark
             {
                 foreach (var child in xml.ChildNodes)
                 {
-                    if(Children.Count != 0)
-                    {
-                        Children.Last().IsLast = false;
-                    }
-
                     if (child is XmlElement element)
                     {
                         switch (element.Name)
@@ -107,8 +104,6 @@ namespace EMark
                     {                        
                         Children.AddLast(new Content(this, text));
                     }
-
-                    Children.Last().IsLast = true;
                 }
             }
         }
@@ -137,20 +132,6 @@ namespace EMark
                 }
             }
             return text;
-
-        }
-
-        public void Align()
-        {
-            foreach(var child in Children)
-            {
-                if (child.IsLast)
-                {
-                    child.Height = child.Height+this.LastHeight;
-                    child.Width = child.Width+this.LastWidth;
-                }
-                child.Align();
-            }
         }
     }
 
@@ -182,6 +163,18 @@ namespace EMark
         {
             bool e = int.TryParse(xmlElement?.GetAttribute("width"), out int result);
             return e ? (int?)result : null;
+        }
+
+        public static int Rows(XmlElement xmlElement)
+        {
+            bool e = int.TryParse(xmlElement?.GetAttribute("rows"), out int result);
+            return e ? result : 0;
+        }
+
+        public static int Columns(XmlElement xmlElement)
+        {
+            bool e = int.TryParse(xmlElement?.GetAttribute("columns"), out int result);
+            return e ? result : 0;
         }
     }
 }

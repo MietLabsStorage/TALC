@@ -1,0 +1,4 @@
+<block columns="2" width="10" height="10">
+<column width="5" textcolor="5">qqqq</column>
+<column width="6">wwww</column>
+</block>

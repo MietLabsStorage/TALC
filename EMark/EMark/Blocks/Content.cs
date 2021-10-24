@@ -36,6 +36,7 @@ namespace EMark
                     {
                         text[i][j] = new PixelText { Sym = ' ', BgColor = this.BgColor ?? 0, TextColor = this.TextColor ?? 0 };
                     }
+                    k++;
                 }
             }
             return text;
