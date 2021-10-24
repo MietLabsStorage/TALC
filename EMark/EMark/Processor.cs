@@ -12,25 +12,59 @@ namespace EMark
         private XmlDocument _xDoc;
         private Block _block;
 
+        public List<string> Exceptions { get; }
+
         public Processor(string filename)
         {
-            _xDoc = new XmlDocument();
-            _xDoc.Load(filename);
-            _block = new EBlock(null, _xDoc.DocumentElement);
+            Exceptions = new List<string>();
+            try
+            {
+                _xDoc = new XmlDocument();
+                _xDoc.Load(filename);
+                _block = new EBlock(null, _xDoc.DocumentElement);
+            }
+            catch(XmlException exception)
+            {
+                Exceptions.Add(exception.Message);
+            }
+            catch (EMarkException exception)
+            {
+                Exceptions.Add(exception.Message);
+            }
         }
 
         public void Render()
         {
-            var text = _block.GetText();
-            for (int i = 0; i < text.Length; i++)
+            if(Exceptions.Count != 0)
             {
-                for (int j = 0; j < text[i].Length; j++)
+                foreach(var exception in Exceptions)
                 {
-                    Console.ForegroundColor = (ConsoleColor)text[i][j].TextColor;
-                    Console.BackgroundColor = (ConsoleColor)text[i][j].BgColor;
-                    Console.Write(text[i][j].Sym);
+                    Console.WriteLine(exception);
                 }
-                Console.WriteLine();
+                return;
+            }
+            try
+            {
+                var text = _block.GetText();
+                for (int i = 0; i < text.Length; i++)
+                {
+                    for (int j = 0; j < text[i].Length; j++)
+                    {
+                        Console.ForegroundColor = (ConsoleColor)text[i][j].TextColor;
+                        Console.BackgroundColor = (ConsoleColor)text[i][j].BgColor;
+                        Console.Write(text[i][j].Sym);
+                    }
+                    Console.WriteLine();
+                }
+            }
+            catch (EMarkException exception)
+            {
+                Console.WriteLine(exception.Message);
+            }
+            finally 
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.BackgroundColor = ConsoleColor.Black;
             }
         }        
     }

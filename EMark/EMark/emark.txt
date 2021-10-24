@@ -1,4 +1,14 @@
-<block columns="2" width="10" height="10">
-<column width="5" textcolor="5">qqqq</column>
-<column width="6">wwww</column>
+<block columns="2" bgcolor="8">
+	<column width="5" bgcolor="12" textcolor="5">
+		qqqqq
+		qqqqqqqqq
+	</column>
+	<column rows="2">
+		<row height="2" bgcolor="3">
+			tttt
+		</row>
+		<row>
+			eeeeee
+		</row>
+	</column>
 </block>

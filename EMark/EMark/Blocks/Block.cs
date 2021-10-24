@@ -41,7 +41,7 @@ namespace EMark
         public Block(
             Block parent,
             XmlElement xml
-            ) : base()
+            ) : this()
         {
             Children = new LinkedList<Block>();
             Parent = parent;
@@ -54,8 +54,8 @@ namespace EMark
             Rows = XmlElementHelper.Rows(xml);
             Columns = XmlElementHelper.Columns(xml);
 
-            var height = XmlElementHelper.Height(xml) ?? 0;
-            var width = XmlElementHelper.Width(xml) ?? 0;
+            var height = XmlElementHelper.Height(xml) ?? (parent == null ? Height : null);
+            var width = XmlElementHelper.Width(xml) ?? (parent == null ? Width : null);
 
             switch (this)
             {
@@ -66,11 +66,11 @@ namespace EMark
 
                 case Column _:
                     Height = parent?.Height ?? height; 
-                    Width = (parent.Children.Count == parent.Childs - 1) ? parent.LastWidth : width;
+                    Width = (parent.Children.Count == parent.Childs - 1) ? parent.LastWidth : width ?? throw new EMarkException("need width");
                     break;
 
                 case Row _:
-                    Height = (parent.Children.Count == parent.Childs - 1) ? parent.LastHeight : height;
+                    Height = (parent.Children.Count == parent.Childs - 1) ? parent.LastHeight : height ?? throw new EMarkException("need height");
                     Width = parent?.Width ?? width;
                     break;
 
@@ -106,6 +106,19 @@ namespace EMark
                     }
                 }
             }
+
+            if (parent != null && !(Children.Count != 0 && Children?.Last() is Content) && !(this is Content))
+            {
+                if (Columns <= 0 && Rows <= 0)
+                {
+                    throw new EMarkException("Need rows or columns");
+                }
+
+                if (Columns > 0 && Rows > 0)
+                {
+                    throw new EMarkException("Need only rows or only columns");
+                }
+            }
         }
 
         public virtual PixelText[][] GetText()
@@ -118,14 +131,54 @@ namespace EMark
                 childTexts.Add(child.GetText());
             }
 
+            /*if(Rows > 0)
+            {
+                List<PixelText[]> childRows = new List<PixelText[]>();
+                foreach (var childRow in childTexts)
+                {
+                    foreach (var row in childRow)
+                    {
+                        childRows.Add(row);
+                    }
+                }
+            }
+            else
+            {
+                for(int i = 0; i < text.Length; i++)
+                {
+                    text[i] = new PixelText[Width ?? 0];
+                    var textRow = new List<PixelText[]>();
+                    foreach (var childRow in childTexts)
+                    {
+                        textRow.Add(childRow[i]);
+                    }
+                }
+            }*/
+            List<PixelText[]> childRows = new List<PixelText[]>();
+            foreach (var childRow in childTexts)
+            {
+                foreach (var row in childRow)
+                {
+                    childRows.Add(row);
+                }
+            }
+
             for (int i = 0; i < text.Length; i++)
             {
                 text[i] = new PixelText[Width ?? 0];
                 var textRow = new List<PixelText>();
-                foreach (var childRow in childTexts)
+                if (Rows > 0)
                 {
-                    textRow.AddRange(childRow[i]);
+                    textRow.AddRange(childRows[i]);   
                 }
+                else
+                {
+                    foreach (var childRow in childTexts)
+                    {
+                        textRow.AddRange(childRow[i]);
+                    }
+                }                             
+
                 for (int j = 0; j < textRow.Count; j++)
                 {
                     text[i][j] = textRow[j];

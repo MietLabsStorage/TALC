@@ -17,6 +17,22 @@ namespace EMark
             ): base(parent, null)
         {
             Text = xml.Value;
+            while(Text.Contains('\n'))
+            {
+                Text = Text.Remove(Text.IndexOf('\n'), 1);
+            }
+            while (Text.Contains('\r'))
+            {
+                Text = Text.Remove(Text.IndexOf('\r'), 1);
+            }
+            while (Text.Contains('\t'))
+            {
+                Text = Text.Remove(Text.IndexOf('\t'), 1);
+            }
+            while (Text.Contains(' '))
+            {
+                Text = Text.Remove(Text.IndexOf(' '), 1);
+            }
         }
 
         public override PixelText[][] GetText()
