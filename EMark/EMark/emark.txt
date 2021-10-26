@@ -1,13 +1,34 @@
 <block columns="2" bgcolor="8">
-	<column width="5" bgcolor="12" textcolor="5">
+	<column width="5" bgcolor="12" textcolor="5" valign="center">
 		qqqqq
 		qqqqqqqqq
 	</column>
-	<column rows="2">
-		<row height="2" bgcolor="3">
+	<column rows="3">
+		<row height="3" bgcolor="3">
 			tttt
 		</row>
-		<row>
+		<row height="2" bgcolor="4" columns="3">
+			<column width="2" bgcolor="5">
+				qwerty
+			</column>
+			<column width="5" bgcolor="6" textcolor="3">
+				qwerty
+			</column>
+			<column >
+				<block rows="3">
+					<row height="1" bgcolor="13" halign="center">
+						1234
+					</row>
+					<row height="1" bgcolor="12" halign="right">
+						1234
+					</row>	
+					<row height="1" bgcolor="11">
+						1234
+					</row>	
+				</block>
+			</column>			
+		</row>
+		<row halign="center" valign="bottom">
 			eeeeee
 		</row>
 	</column>

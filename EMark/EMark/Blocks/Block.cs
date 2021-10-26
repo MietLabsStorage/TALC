@@ -82,6 +82,10 @@ namespace EMark
 
             if (xml != null)
             {
+                if(xml.ChildNodes.Count != Childs)
+                {
+                    throw new EMarkException("Errors children count");
+                }
                 foreach (var child in xml.ChildNodes)
                 {
                     if (child is XmlElement element)
@@ -109,7 +113,7 @@ namespace EMark
 
             if (parent != null && !(Children.Count != 0 && Children?.Last() is Content) && !(this is Content))
             {
-                if (Columns <= 0 && Rows <= 0)
+                if (Columns <= 0 && Rows <= 0 && !(Children?.Last() is EBlock)) 
                 {
                     throw new EMarkException("Need rows or columns");
                 }
@@ -131,29 +135,6 @@ namespace EMark
                 childTexts.Add(child.GetText());
             }
 
-            /*if(Rows > 0)
-            {
-                List<PixelText[]> childRows = new List<PixelText[]>();
-                foreach (var childRow in childTexts)
-                {
-                    foreach (var row in childRow)
-                    {
-                        childRows.Add(row);
-                    }
-                }
-            }
-            else
-            {
-                for(int i = 0; i < text.Length; i++)
-                {
-                    text[i] = new PixelText[Width ?? 0];
-                    var textRow = new List<PixelText[]>();
-                    foreach (var childRow in childTexts)
-                    {
-                        textRow.Add(childRow[i]);
-                    }
-                }
-            }*/
             List<PixelText[]> childRows = new List<PixelText[]>();
             foreach (var childRow in childTexts)
             {
