@@ -21,7 +21,14 @@ namespace EMark
             {
                 _xDoc = new XmlDocument();
                 _xDoc.Load(filename);
-                _block = new EBlock(null, _xDoc.DocumentElement);
+                if(_xDoc.DocumentElement.Name != "block")
+                {
+                    Exceptions.Add("Not block begun");
+                }
+                else
+                {
+                    _block = new EBlock(null, _xDoc.DocumentElement);
+                }
             }
             catch(XmlException exception)
             {
