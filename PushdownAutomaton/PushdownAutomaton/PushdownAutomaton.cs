@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -87,18 +88,21 @@ namespace PushdownAutomaton
             {
                 Console.Write($"{elem} ");
             }
+            Console.WriteLine();
 
             Console.Write($"Z: ");
             foreach (var elem in _globalZ)
             {
                 Console.Write($"{elem} ");
             }
+            Console.WriteLine();
 
             Console.Write($"S: ");
             foreach (var elem in _globalS)
             {
                 Console.Write($"{elem} ");
             }
+            Console.WriteLine();
 
             Console.Write($"F: ");
             foreach (var elem in _globalF)
@@ -135,10 +139,10 @@ namespace PushdownAutomaton
 
                     if(processes.Count > 100)
                     {
-                        Console.WriteLine($"Processed {processes.Count} branches...");
+                        Console.WriteLine($"Processed {processes.Count} branches...  {System.Diagnostics.Process.GetCurrentProcess().WorkingSet64 / 1024 / 1024} MB memory");
                     }
 
-                    if(count > 100000)
+                    if(count > 100000 || System.Diagnostics.Process.GetCurrentProcess().WorkingSet64 / 1024 / 1024 > 500)
                     {
                         Console.WriteLine("PROBABLY SMTH BAD");
                         return;
