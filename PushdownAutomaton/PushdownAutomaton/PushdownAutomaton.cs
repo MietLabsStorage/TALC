@@ -136,10 +136,13 @@ namespace PushdownAutomaton
                     {
                         break;
                     }
+                    
+                    Console.WriteLine($"Processed {processes.Count} branches...  {System.Diagnostics.Process.GetCurrentProcess().WorkingSet64 / 1024 / 1024} MB memory, {count}  cicles");                    
 
-                    if(processes.Count > 100)
+                    if(processes.Count == 0)
                     {
-                        Console.WriteLine($"Processed {processes.Count} branches...  {System.Diagnostics.Process.GetCurrentProcess().WorkingSet64 / 1024 / 1024} MB memory");
+                        Console.WriteLine("BAD STRING");
+                        return;
                     }
 
                     if(count > 100000 || System.Diagnostics.Process.GetCurrentProcess().WorkingSet64 / 1024 / 1024 > 500)
