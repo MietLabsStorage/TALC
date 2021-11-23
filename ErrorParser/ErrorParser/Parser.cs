@@ -38,6 +38,7 @@ namespace ErrorParser
 
         private Dictionary<string, HashSet<string>> _firsts;
         private Dictionary<string, HashSet<string>> _follows;
+        private List<KeyValuePair<(string A, string a), KeyValuePair<TransactionArg, List<string>>>> _table;
 
         const char Eof = '$';
 
@@ -49,6 +50,7 @@ namespace ErrorParser
             _globalZ = new HashSet<string>();
             _firsts = new Dictionary<string, HashSet<string>>();
             _follows = new Dictionary<string, HashSet<string>>();
+            _table = new List<KeyValuePair<(string A, string a), KeyValuePair<TransactionArg, List<string>>>>();
 
             var lines = File.ReadAllLines(filename);
 
@@ -78,10 +80,10 @@ namespace ErrorParser
                 }
             }
 
-            foreach (var sym in _globalP)
+            /*foreach (var sym in _globalP)
             {
                 _transactions.Add(new KeyValuePair<TransactionArg, List<TransactionVal>>(new TransactionArg { S = "s0", P = sym.ToString(), H = sym }, new List<TransactionVal>() { new TransactionVal { S = "s0", H = new List<string> { Eof.ToString() } } }));
-            }
+            }*/
 
              //firsts
             foreach (var A in _globalZ)
@@ -118,6 +120,7 @@ namespace ErrorParser
             {
                 _follows.Add(A, new HashSet<string>());
             }
+            _follows["<program>"].Add(Eof.ToString());
             changed = true;
             while (changed)
             {
@@ -135,34 +138,88 @@ namespace ErrorParser
                                 {
                                     gamma.Add(trans.H[j]);
                                 }
-                                if(gamma.Count() == 0)
+                                /*if(gamma.Count() == 0)
                                 {
                                     gamma.Add(Eof.ToString());
-                                }
-                                var fst = First(gamma);
-                                var removed = fst.Remove(Eof.ToString());
-                                var flwlen = _follows[trans.H[i]].Count();
-                                for (int k = 0; k < fst.Count; k++)
+                                }*/
+                                if (gamma.Count() != 0)
                                 {
-                                    _follows[trans.H[i]].Add(fst[k]);
+                                    var fst = First(gamma);
+                                    var removed = fst.Remove(Eof.ToString());
+                                    var flwlen = _follows[trans.H[i]].Count();
+                                    for (int k = 0; k < fst.Count; k++)
+                                    {
+                                        _follows[trans.H[i]].Add(fst[k]);
+                                    }
+                                    if (removed)
+                                    {
+                                        var flw = _follows[transA.Key.H];
+                                        foreach (var fw in flw)
+                                        {
+                                            _follows[trans.H[i]].Add(fw);
+                                        }
+                                    }
+                                    if (_follows[trans.H[i]].Count() != flwlen)
+                                    {
+                                        changed = true;
+                                    }
                                 }
-                                if (removed)
+                                else
                                 {
+                                    var flwlen = _follows[trans.H[i]].Count();
                                     var flw = _follows[transA.Key.H];
                                     foreach (var fw in flw)
                                     {
                                         _follows[trans.H[i]].Add(fw);
                                     }
-                                }
-                                if(_follows[trans.H[i]].Count() != flwlen)
-                                {
-                                    changed = true;
+                                    if (_follows[trans.H[i]].Count() != flwlen)
+                                    {
+                                        changed = true;
+                                    }
                                 }
                             }
                         }                      
 
                     }
 
+                }
+            }
+
+            foreach (var transA in _transactions)
+            {
+                foreach (var trans in transA.Value)
+                {
+                    var first = _firsts[transA.Key.H];
+                    foreach(var fst in first)
+                    {
+                        _table.Add(
+                            new KeyValuePair<(string A, string a), KeyValuePair<TransactionArg, List<string>>>(
+                                (transA.Key.H, fst), 
+                                new KeyValuePair<TransactionArg, List<string>>(transA.Key, trans.H)
+                            ));
+                    }
+                    if (first.Contains(Eof.ToString()))
+                    {
+                        var follow = _follows[transA.Key.H];
+                        foreach (var flw in follow)
+                        {
+                            _table.Add(
+                                new KeyValuePair<(string A, string a), KeyValuePair<TransactionArg, List<string>>>(
+                                    (transA.Key.H, flw),
+                                    new KeyValuePair<TransactionArg, List<string>>(transA.Key, trans.H)
+                                ));
+                        }
+
+                        if (follow.Contains(Eof.ToString()))
+                        {
+                            _table.Add(
+                                new KeyValuePair<(string A, string a), KeyValuePair<TransactionArg, List<string>>>(
+                                    (transA.Key.H, Eof.ToString()),
+                                    new KeyValuePair<TransactionArg, List<string>>(transA.Key, trans.H)
+                                ));
+                        }
+                    }
+                    
                 }
             }
 
@@ -217,9 +274,35 @@ namespace ErrorParser
             {
                 var termElems = elem.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).ToList();
                 var spaces = termElems.Count() - 1;
-                for(int i = 0; i < spaces; i++)
+                /*for(int i = 0; i < spaces; i++)
                 {
-                    termElems.Insert(i * 2 + 1, " ");
+                    if(termElems[i * 2].Last() == '>' && termElems[i * 2 + 1].First() == '\'' ||
+                        termElems[i * 2].Last() == '\'' && termElems[i * 2 + 1].First() == '<' ||
+                        termElems[i * 2].Last() == '\'' && termElems[i * 2 + 1].First() == '\'')
+                    {
+                        //ignore
+                    }
+                    else
+                    {
+                        termElems.Insert(i * 2 + 1, "\' \'");
+                    }
+                }*/
+                var spLen = termElems.Count() - 1;
+                var ind = 0;
+                while(ind < spLen)
+                {
+                    if (/*termElems[ind].Last() == '>' && termElems[ind + 1].First() == '\'' ||
+                        termElems[ind].Last() == '\'' && termElems[ind + 1].First() == '<' ||*/
+                        /*termElems[ind].Last() == '\'' && termElems[ind + 1].First() == '\'' ||*/ termElems[ind] == "\' \'")
+                    {
+                        //ignore
+                    }
+                    else
+                    {
+                        termElems.Insert(ind + 1, "\' \'");
+                    }
+                    spLen = termElems.Count() - 1;
+                    ind++;
                 }
 
 
@@ -229,6 +312,10 @@ namespace ErrorParser
 
                     termElems[0] += ">";
                     termElems[1] = "<" + termElems[1];
+                }
+                foreach(var term in termElems)
+                {
+                    _globalP.Add(term);
                 }
 
                 transactionVals.Add(new TransactionVal { S = "s0", H = termElems });                
@@ -253,5 +340,100 @@ namespace ErrorParser
         public static bool IsTerminal(string val) => val[0] == '\'';
 
         public static bool IsNONTerminal(string val) => val[0] == '<';
+
+        public static string WithoutBracks(string str)
+        {
+            if(str == Eof.ToString())
+            {
+                return Eof.ToString();
+            }
+            str = str.Remove(0, 1);
+            return str.Remove(str.Length - 1, 1);
+        }
+
+        public void Run(string code)
+        {
+            Stack<string> stack = new Stack<string>();
+            stack.Push(Eof.ToString());
+            stack.Push(_globalZ.First());
+
+            code = code.Replace("\n", " ");
+            code = code.Replace("\r", " ");
+            code = code.Replace("\t", " ");
+            while(code.Contains("  "))
+            {
+                code = code.Replace("  ", " ");
+            }
+
+            List<string> codeSymbols = new List<string>();
+            int j = 0;
+            string str = "";
+            while (true)
+            {
+                if(code[j] != ' ')
+                {
+                    str += code[j];
+                }
+                else
+                {
+                    if (this._globalZ.Contains($"<{str}>") || this._globalP.Contains($"\'{str}\'"))
+                    {
+                        codeSymbols.Add(str);
+                        str = "";
+                        codeSymbols.Add(" ");
+                    }
+                    else
+                    {
+                        foreach(var sym in str)
+                        {
+                            codeSymbols.Add(sym.ToString());
+                        }
+                        str = "";
+                    }
+                }
+                j++;
+                if(j == code.Length)
+                {
+                    break;
+                }
+            }
+
+            int i = 0;
+            do
+            {
+                if (stack.Peek() == Eof.ToString() || IsTerminal(stack.Peek()))
+                {
+                    if (WithoutBracks(stack.Peek()) == codeSymbols[i])
+                    {
+                        stack.Pop();
+                        i++;
+                    }
+                    else
+                    {
+                        throw new Exception();
+                    }
+                }
+                else
+                {
+                    var M = _table.FirstOrDefault(_ => _.Key.A == stack.Peek() && WithoutBracks(_.Key.a) == codeSymbols[i]);
+                    if (M.Value.Value != null)
+                    {
+                        stack.Pop();
+                        for (int k = M.Value.Value.Count - 1; k >= 0; k--)
+                        {
+                            if(M.Value.Value[k] != Eof.ToString())
+                            {
+                                stack.Push(M.Value.Value[k]);
+                            }
+                        }
+
+                    }
+                    else
+                    {
+                        throw new Exception();
+                    }
+                }
+            } while (stack.Peek() != Eof.ToString());
+        }
     }
 }

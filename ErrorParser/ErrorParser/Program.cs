@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace ErrorParser
 {
@@ -6,8 +7,8 @@ namespace ErrorParser
     {
         static void Main(string[] args)
         {
-            new Parser("grammatic.txt");
-            Console.WriteLine("Hello World!");
+            var parser = new Parser("grammatic.txt");
+            parser.Run(File.ReadAllText("code.txt"));
         }
     }
 }

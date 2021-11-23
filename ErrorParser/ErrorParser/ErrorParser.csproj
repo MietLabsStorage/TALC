@@ -6,6 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Update="code.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="grammatic.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
