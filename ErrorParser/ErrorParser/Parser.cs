@@ -185,41 +185,48 @@ namespace ErrorParser
                 }
             }
 
+            //table
             foreach (var transA in _transactions)
             {
                 foreach (var trans in transA.Value)
                 {
-                    var first = _firsts[transA.Key.H];
+                    var first = First(trans.H);
                     foreach(var fst in first)
                     {
-                        _table.Add(
-                            new KeyValuePair<(string A, string a), KeyValuePair<TransactionArg, List<string>>>(
-                                (transA.Key.H, fst), 
-                                new KeyValuePair<TransactionArg, List<string>>(transA.Key, trans.H)
-                            ));
+                        if (IsTerminal(fst))
+                        {
+                            _table.Add(
+    new KeyValuePair<(string A, string a), KeyValuePair<TransactionArg, List<string>>>(
+        (transA.Key.H, fst),
+        new KeyValuePair<TransactionArg, List<string>>(transA.Key, trans.H)
+    ));
+                        }
+                    }
+                    var follow = _follows[transA.Key.H];
+                    if (first.Contains(Eof.ToString()) && trans.H.First() != Eof.ToString())
+                    {
+                        
+                        foreach (var flw in follow)
+                        {
+                            if (IsTerminal(flw))
+                            {
+                                _table.Add(
+    new KeyValuePair<(string A, string a), KeyValuePair<TransactionArg, List<string>>>(
+        (transA.Key.H, flw),
+        new KeyValuePair<TransactionArg, List<string>>(transA.Key, trans.H)
+    ));
+                            }
+                        }                        
                     }
                     if (first.Contains(Eof.ToString()))
                     {
-                        var follow = _follows[transA.Key.H];
-                        foreach (var flw in follow)
-                        {
-                            _table.Add(
-                                new KeyValuePair<(string A, string a), KeyValuePair<TransactionArg, List<string>>>(
-                                    (transA.Key.H, flw),
-                                    new KeyValuePair<TransactionArg, List<string>>(transA.Key, trans.H)
-                                ));
-                        }
-
-                        if (follow.Contains(Eof.ToString()))
-                        {
-                            _table.Add(
-                                new KeyValuePair<(string A, string a), KeyValuePair<TransactionArg, List<string>>>(
-                                    (transA.Key.H, Eof.ToString()),
-                                    new KeyValuePair<TransactionArg, List<string>>(transA.Key, trans.H)
-                                ));
-                        }
+                        _table.Add(
+                            new KeyValuePair<(string A, string a), KeyValuePair<TransactionArg, List<string>>>(
+                                (transA.Key.H, Eof.ToString()),
+                                new KeyValuePair<TransactionArg, List<string>>(transA.Key, trans.H)
+                            ));
                     }
-                    
+
                 }
             }
 
@@ -272,66 +279,65 @@ namespace ErrorParser
             List<TransactionVal> transactionVals = new List<TransactionVal>();
             foreach (var elem in elems)
             {
-                var termElems = elem.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-                var spaces = termElems.Count() - 1;
-                /*for(int i = 0; i < spaces; i++)
+                int i = 0;
+                string word = "";
+                List<string> Hs = new List<string>();
+                while (true)
                 {
-                    if(termElems[i * 2].Last() == '>' && termElems[i * 2 + 1].First() == '\'' ||
-                        termElems[i * 2].Last() == '\'' && termElems[i * 2 + 1].First() == '<' ||
-                        termElems[i * 2].Last() == '\'' && termElems[i * 2 + 1].First() == '\'')
+                    if (i >= elem.Length)
                     {
-                        //ignore
+                        break;
                     }
-                    else
+
+                    if (elem[i] == Eof)
                     {
-                        termElems.Insert(i * 2 + 1, "\' \'");
+                        i++;
+                        Hs.Add(Eof.ToString());
+                        continue;
                     }
-                }*/
-                var spLen = termElems.Count() - 1;
-                var ind = 0;
-                while(ind < spLen)
-                {
-                    if (/*termElems[ind].Last() == '>' && termElems[ind + 1].First() == '\'' ||
-                        termElems[ind].Last() == '\'' && termElems[ind + 1].First() == '<' ||*/
-                        /*termElems[ind].Last() == '\'' && termElems[ind + 1].First() == '\'' ||*/ termElems[ind] == "\' \'")
+
+                    if(elem[i] == ' ')
                     {
-                        //ignore
+                        Hs.Add(" ");
+                        i++;
                     }
-                    else
+
+                    if(elem[i] == '<')
                     {
-                        termElems.Insert(ind + 1, "\' \'");
-                    }
-                    spLen = termElems.Count() - 1;
-                    ind++;
-                }
-
-
-                if (termElems.Count() == 1 && termElems[0].Contains("><"))
-                {
-                    termElems = termElems[0].Split(new string[] { "><" }, StringSplitOptions.None).ToList();
-
-                    termElems[0] += ">";
-                    termElems[1] = "<" + termElems[1];
-                }
-                foreach(var term in termElems)
-                {
-                    _globalP.Add(term);
-                }
-
-                transactionVals.Add(new TransactionVal { S = "s0", H = termElems });                
-
-                /*var syms = transactionVals.Last().H.Split();
-                foreach (var sym in syms)
-                {
-                    foreach (var s in sym)
-                    {
-                        _globalZ.Add(s);
-                        if (!"ABCDEFGHIJKLMNOPQRSTUVWXYZ".Contains(s))
+                        while(elem[i] != '>')
                         {
-                            _globalP.Add(s);
+                            word += elem[i];
+                            i++;
                         }
+                        word += elem[i];
+                        i++;
+
+                        Hs.Add(word);
+                        _globalP.Add(word);
+                        word = "";
+                        continue;
                     }
-                }*/
+
+                    if (elem[i] == '\'')
+                    {
+                        word += elem[i];
+                        i++;
+                        while (elem[i] != '\'')
+                        {
+                            word += elem[i];
+                            i++;
+                        }
+                        word += elem[i];
+                        i++;
+
+                        Hs.Add(word);
+                        _globalP.Add(word);
+                        word = "";
+                        continue;
+                    }
+                }
+                transactionVals.Add(new TransactionVal { S = "s0", H = Hs });
+
             }
 
             return new KeyValuePair<TransactionArg, List<TransactionVal>>(transactionArg, transactionVals);
@@ -370,29 +376,30 @@ namespace ErrorParser
             string str = "";
             while (true)
             {
-                if(code[j] != ' ')
+
+                do
                 {
                     str += code[j];
+                    j++;
+                } while (code[j] != ' ');
+                str += code[j];
+                j++;
+                if (this._globalP.Contains($"\'{str}\'"))
+                {
+                    codeSymbols.Add(str);
+                    str = "";
                 }
                 else
                 {
-                    if (this._globalZ.Contains($"<{str}>") || this._globalP.Contains($"\'{str}\'"))
+                    foreach (var sym in str)
                     {
-                        codeSymbols.Add(str);
-                        str = "";
-                        codeSymbols.Add(" ");
+                        codeSymbols.Add(sym.ToString());
                     }
-                    else
-                    {
-                        foreach(var sym in str)
-                        {
-                            codeSymbols.Add(sym.ToString());
-                        }
-                        str = "";
-                    }
+                    codeSymbols.RemoveAt(codeSymbols.Count - 1);
+                    str = "";
                 }
-                j++;
-                if(j == code.Length)
+
+                if (j == code.Length)
                 {
                     break;
                 }
@@ -416,6 +423,11 @@ namespace ErrorParser
                 else
                 {
                     var M = _table.FirstOrDefault(_ => _.Key.A == stack.Peek() && WithoutBracks(_.Key.a) == codeSymbols[i]);
+                    if (M.Value.Value == null)
+                    {
+                        M = _table.FirstOrDefault(_ => _.Key.A == stack.Peek() && WithoutBracks(_.Key.a) == Eof.ToString());
+                    }
+                    
                     if (M.Value.Value != null)
                     {
                         stack.Pop();
