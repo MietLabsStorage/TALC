@@ -1,0 +1,23 @@
+print "5 * 6" , " = " , 5 * 6
+print "30 / 6" , " = " , 30 / 6
+print "ququruza " , 125
+print "difficult " , 2 + 2 * 2
+print "difficult " , 2 - 2 / 2 , " wow!"
+print "----------------------------"
+print "write first num"
+scan _fst
+print "write first num"
+scan _scd
+_sum = _fst + _scd
+_subscribe = _fst - _scd
+_multiply = _fst * _scd
+_divide = _fst / _scd
+print _fst , "+" , _scd , "=" , _sum
+print _fst , "-" , _scd , "=" , _subscribe
+print _fst , "*" , _scd , "=" , _multiply
+print _fst , "/" , _scd , "=" , _divide
+print "----------------------------"
+for i = 1 to 5 
+{
+print i * i
+}
