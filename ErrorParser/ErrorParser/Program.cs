@@ -8,7 +8,10 @@ namespace ErrorParser
         static void Main(string[] args)
         {
             var parser = new Parser("grammatic.txt");
-            parser.Run(File.ReadAllText("code.txt"));
+            parser
+                .Run(File.ReadAllText("code.txt"))
+                .PrintTotalErrorCount()
+                .GenerateHistory();
         }
     }
 }

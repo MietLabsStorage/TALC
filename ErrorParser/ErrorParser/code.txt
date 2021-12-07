@@ -6,5 +6,6 @@ void main ( )
 		{
 			for ( 28 != qu ) { return 127 ; }
 		}
-	}
-} 
+	} 
+	int a ;
+}

@@ -19,6 +19,13 @@ namespace ErrorParser
         }
     }
 
+    public class History
+    {
+        public string Stack { get; set; }
+        public string Input { get; set; }
+        public string AddInfo { get; set; }
+    }
+
     public class TransactionVal
     {
         public string S { get; set; }
@@ -39,6 +46,7 @@ namespace ErrorParser
         private Dictionary<string, HashSet<string>> _firsts;
         private Dictionary<string, HashSet<string>> _follows;
         private List<KeyValuePair<(string A, string a), KeyValuePair<TransactionArg, List<string>>>> _table;
+        private List<History> _history;
 
         const char Eof = '$';
 
@@ -54,6 +62,7 @@ namespace ErrorParser
             _table = new List<KeyValuePair<(string A, string a), KeyValuePair<TransactionArg, List<string>>>>();
 
             _errors = new List<string>();
+            _history = new List<History>();
 
             var lines = File.ReadAllLines(filename);
 
@@ -360,11 +369,11 @@ namespace ErrorParser
             return str.Remove(str.Length - 1, 1);
         }
 
-        public void Run(string code)
+        public Parser Run(string code)
         {
-            Stack<string> stack = new Stack<string>();
-            stack.Push(Eof.ToString());
-            stack.Push(_globalZ.First());
+            List<string> stack = new List<string>();
+            stack.Add(Eof.ToString());
+            stack.Add(_globalZ.First());
 
             code = code.Replace("\n", " ");
             code = code.Replace("\r", " ");
@@ -379,13 +388,23 @@ namespace ErrorParser
             string str = "";
             while (true)
             {
-
-                do
+                try
                 {
+                    do
+                    {
+                        str += code[j];
+                        j++;
+                    } while (code[j] != ' ');
                     str += code[j];
-                    j++;
-                } while (code[j] != ' ');
-                str += code[j];
+                }
+                catch
+                {
+                    _errors.Add($"last space-symbol at {codeSymbols.Count + 1}");
+                    Console.WriteLine(_errors.Last());
+                    j--;
+                    str += ' ';
+                }
+
                 j++;
                 if (this._globalP.Contains($"\'{str}\'"))
                 {
@@ -409,59 +428,83 @@ namespace ErrorParser
             }
 
             int i = 0;
+            _history.Add(new History
+            {
+                Stack = stack.Aggregate((a, b) => $"{a}{b}"),
+                Input = codeSymbols.Aggregate((a, b) => $"{a}{b}").Substring(i),
+                AddInfo = ""
+            });
             do
             {
                 if (i >= codeSymbols.Count)
                 {
                     break;
                 }
-                if (stack.Peek() == Eof.ToString() || IsTerminal(stack.Peek()))
+                if (stack.Last() == Eof.ToString() || IsTerminal(stack.Last()))
                 {
-                    if (WithoutBracks(stack.Peek()) == codeSymbols[i])
+                    if (WithoutBracks(stack.Last()) == codeSymbols[i])
                     {
-                        stack.Pop();
+                        _history.Add(new History
+                        {
+                            Stack = stack.Aggregate((a, b) => $"{a}{b}"),
+                            Input = codeSymbols.Aggregate((a, b) => $"{a}{b}").Substring(i),
+                            AddInfo = ""
+                        });
+                        stack.RemoveAt(stack.Count - 1);
                         i++;
                     }
                     else
                     {
+                        _history.Add(new History
+                        {
+                            Stack = stack.Aggregate((a, b) => $"{a}{b}"),
+                            Input = codeSymbols.Aggregate((a, b) => $"{a}{b}").Substring(i),
+                            AddInfo = $"scip {codeSymbols[i]}"
+                        });
                         //throw new Exception();
-                        _errors.Add($"in {i} expected {stack.Pop()} but actual is {codeSymbols[i]}");                        
+                        _errors.Add($"in {i} expected {stack.Last()} but actual is {codeSymbols[i]}");
+                        stack.RemoveAt(stack.Count - 1);
                         i++;
                         Console.WriteLine(_errors.Last());
                     }
                 }
                 else
                 {
-                    var M = _table.FirstOrDefault(_ => _.Key.A == stack.Peek() && WithoutBracks(_.Key.a) == codeSymbols[i]);
+                    var M = _table.FirstOrDefault(_ => _.Key.A == stack.Last() && WithoutBracks(_.Key.a) == codeSymbols[i]);
                     if (M.Value.Value == null)
                     {
-                        M = _table.FirstOrDefault(_ => _.Key.A == stack.Peek() && WithoutBracks(_.Key.a) == Eof.ToString());
+                        M = _table.FirstOrDefault(_ => _.Key.A == stack.Last() && WithoutBracks(_.Key.a) == Eof.ToString());
                     }
                     
                     if (M.Value.Value != null)
                     {
-                        stack.Pop();
+                        stack.RemoveAt(stack.Count - 1);
                         for (int k = M.Value.Value.Count - 1; k >= 0; k--)
                         {
                             if(M.Value.Value[k] != Eof.ToString())
                             {
-                                stack.Push(M.Value.Value[k]);
+                                stack.Add(M.Value.Value[k]);
                             }
                         }
-
+                        _history.Add(new History
+                        {
+                            Stack = stack.Aggregate((a, b) => $"{a}{b}"),
+                            Input = codeSymbols.Aggregate((a, b) => $"{a}{b}").Substring(i),
+                            AddInfo = $""
+                        });
                     }
                     else
                     {
                         //throw new Exception();
-                        _errors.Add($"in {i} expected {stack.Peek()} but actual is {codeSymbols[i]}");
+                        _errors.Add($"in {i} expected {stack.Last()} but actual is {codeSymbols[i]}");
                         Console.WriteLine(_errors.Last());
 
                         var synchTokens = new HashSet<string>();
-                        foreach(var fst in _firsts[stack.Peek()])
+                        foreach(var fst in _firsts[stack.Last()])
                         {
                             synchTokens.Add(WithoutBracks(fst));
                         }
-                        foreach (var flw in _follows[stack.Peek()])
+                        foreach (var flw in _follows[stack.Last()])
                         {
                             synchTokens.Add(WithoutBracks(flw));
                         }
@@ -469,6 +512,12 @@ namespace ErrorParser
                         bool synch = false;
                         do
                         {
+                            _history.Add(new History
+                            {
+                                Stack = stack.Aggregate((a, b) => $"{a}{b}"),
+                                Input = codeSymbols.Aggregate((a, b) => $"{a}{b}").Substring(i),
+                                AddInfo = $"scip {codeSymbols[i]}"
+                            });
                             i++;
                             if(i >= codeSymbols.Count)
                             {
@@ -476,18 +525,52 @@ namespace ErrorParser
                             }
                             synch = synchTokens.Contains(codeSymbols[i]);
                         } while (!synch);
+                        _history.Add(new History
+                        {
+                            Stack = stack.Aggregate((a, b) => $"{a}{b}"),
+                            Input = codeSymbols.Aggregate((a, b) => $"{a}{b}").Substring(i),
+                            AddInfo = $"synch with {codeSymbols[i]}"
+                        });
                     }
                 }
-            } while (stack.Peek() != Eof.ToString());
+            } while (stack.Last() != Eof.ToString());
+
+            if(i != codeSymbols.Count)
+            {
+                _errors.Add($"End of code but find any symbols: \'{codeSymbols.Aggregate((a, b) => $"{a}{b}").Substring(i)}\'");
+                Console.WriteLine(_errors.Last());
+            }
+
             Console.WriteLine("End of analize");
+            return this;
         }
 
-        public void PrintErrors()
+        public Parser PrintErrors()
         {
             foreach(var err in _errors)
             {
                 Console.WriteLine(err);
             }
+            return this;
+        }
+
+        public Parser PrintTotalErrorCount()
+        {
+            Console.WriteLine($"Errors total count: {_errors.Count}");
+            return this;
+        }
+
+        public Parser GenerateHistory()
+        {
+            File.Delete("History.txt");
+            using (StreamWriter sw = new StreamWriter("History.txt", true, System.Text.Encoding.Default))
+            {
+                foreach(var record in _history)
+                {
+                    sw.WriteLine($"{record.Stack} \t|\t {record.Input} \t|\t {record.AddInfo}");
+                }
+            }
+            return this;
         }
     }
 }
