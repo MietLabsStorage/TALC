@@ -21,3 +21,21 @@ for i = 1 to 5
 {
 print i * i
 }
+print "----------------------------"
+if 1 < 2
+{
+print "less"
+}
+if 3 > 2
+{
+print "more"
+}
+if 1 != 2
+{
+print "not equals"
+}
+if 1 == 1
+{
+print "equals"
+}
+print "----------------------------"

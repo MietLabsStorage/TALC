@@ -21,7 +21,7 @@ namespace Interpreter
             return null;
         }
 
-        public static string Statement(List<string> code, ref int id)
+        public static string Statement(List<string> code, ref int id, bool isLoop = false)
         {
             switch (code[id])
             {
@@ -37,13 +37,19 @@ namespace Interpreter
                     id++;
                     For(code, ref id);
                     break;
-                case "if":
+                case "if":                    
                     id++;
+                    If(code, ref id);
                     break;
                 default:
                     //assign
                     Assign(code, ref id);
                     break;
+            }
+
+            if (isLoop)
+            {
+                return null;
             }
 
             if (id < code.Count - 1)
@@ -58,6 +64,92 @@ namespace Interpreter
             Console.WriteLine(PrintEnd(code, ref id));
             id++;
             return null;
+        }
+
+        public static string If(List<string> code, ref int id)
+        {
+            var excpression = BoolExcpression(code, ref id);
+            if (bool.Parse(excpression))
+            {
+                id = id + 1; // scip {
+                if (id < code.Count && code[id] != "{")
+                {
+                    throw new Exception($"Not know operation {code[id - 1]} {code[id]}");
+                }
+
+                id++;
+                if (id < code.Count)
+                {
+                    Statement(code, ref id, true);
+                }
+
+                if (id < code.Count && code[id] != "}")
+                {
+                    throw new Exception($"Not know operation {code[id - 1]} {code[id]}");
+                }
+
+            }
+            else
+            {
+                id = id + 1; // scip {
+                if (id < code.Count && code[id] != "{")
+                {
+                    throw new Exception($"Not know operation {code[id - 1]} {code[id]}");
+                }
+                int count = 1;
+                while(count != 0)
+                {
+                    id++;
+                    if(code[id] == "{")
+                    {
+                        count++;
+                    }
+                    if (code[id] == "}")
+                    {
+                        count--;
+                    }
+                }                
+            }
+            id++;
+            return null;
+        }
+
+        public static string BoolExcpression(List<string> code, ref int id)
+        {
+            var left = Expression(code, ref id);
+            string relop = "";
+            string right = "";
+            id++;
+            if (id < code.Count - 1)
+            {
+                relop = code[id];
+            }
+            id++;
+            if (id < code.Count - 1)
+            {
+                right = Expression(code, ref id);
+            }
+
+            bool expression = false;
+            switch (relop)
+            {
+                case "<":
+                    expression = int.Parse(left) < int.Parse(right);
+                    break;
+
+                case ">":
+                    expression = int.Parse(left) > int.Parse(right);
+                    break;
+
+                case "==":
+                    expression = int.Parse(left) == int.Parse(right);
+                    break;
+
+                case "!=":
+                    expression = int.Parse(left) != int.Parse(right);
+                    break;
+            }
+            return expression.ToString();
         }
 
         public static string For(List<string> code, ref int id)
@@ -106,11 +198,10 @@ namespace Interpreter
                     {
                         valuesTable.Add(key, i.ToString());
                     }
-                    Statement(code, ref id);
+                    Statement(code, ref id, true);
                 }
             }
 
-            id = id + 1; // scip }
             if (id < code.Count && code[id] != "}")
             {
                 throw new Exception($"Not know operation {code[id - 1]} {code[id]}");
