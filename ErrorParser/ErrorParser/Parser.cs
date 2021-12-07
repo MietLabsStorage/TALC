@@ -42,6 +42,7 @@ namespace ErrorParser
 
         const char Eof = '$';
 
+        private List<string> _errors;
 
         public Parser(string filename)
         {
@@ -51,6 +52,8 @@ namespace ErrorParser
             _firsts = new Dictionary<string, HashSet<string>>();
             _follows = new Dictionary<string, HashSet<string>>();
             _table = new List<KeyValuePair<(string A, string a), KeyValuePair<TransactionArg, List<string>>>>();
+
+            _errors = new List<string>();
 
             var lines = File.ReadAllLines(filename);
 
@@ -408,6 +411,10 @@ namespace ErrorParser
             int i = 0;
             do
             {
+                if (i >= codeSymbols.Count)
+                {
+                    break;
+                }
                 if (stack.Peek() == Eof.ToString() || IsTerminal(stack.Peek()))
                 {
                     if (WithoutBracks(stack.Peek()) == codeSymbols[i])
@@ -417,7 +424,10 @@ namespace ErrorParser
                     }
                     else
                     {
-                        throw new Exception();
+                        //throw new Exception();
+                        _errors.Add($"in {i} expected {stack.Pop()} but actual is {codeSymbols[i]}");                        
+                        i++;
+                        Console.WriteLine(_errors.Last());
                     }
                 }
                 else
@@ -442,10 +452,42 @@ namespace ErrorParser
                     }
                     else
                     {
-                        throw new Exception();
+                        //throw new Exception();
+                        _errors.Add($"in {i} expected {stack.Peek()} but actual is {codeSymbols[i]}");
+                        Console.WriteLine(_errors.Last());
+
+                        var synchTokens = new HashSet<string>();
+                        foreach(var fst in _firsts[stack.Peek()])
+                        {
+                            synchTokens.Add(WithoutBracks(fst));
+                        }
+                        foreach (var flw in _follows[stack.Peek()])
+                        {
+                            synchTokens.Add(WithoutBracks(flw));
+                        }
+
+                        bool synch = false;
+                        do
+                        {
+                            i++;
+                            if(i >= codeSymbols.Count)
+                            {
+                                break;
+                            }
+                            synch = synchTokens.Contains(codeSymbols[i]);
+                        } while (!synch);
                     }
                 }
             } while (stack.Peek() != Eof.ToString());
+            Console.WriteLine("End of analize");
+        }
+
+        public void PrintErrors()
+        {
+            foreach(var err in _errors)
+            {
+                Console.WriteLine(err);
+            }
         }
     }
 }

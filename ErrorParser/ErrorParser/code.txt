@@ -1,4 +1,10 @@
-int main ( ) 
+void main ( ) 
 { 
-	int aa = 1 ; 
+	if ( aa < bfe ) 
+	{
+		if ( void ququruza ; aa == ququruza ; )
+		{
+			for ( 28 != qu ) { return 127 ; }
+		}
+	}
 } 
