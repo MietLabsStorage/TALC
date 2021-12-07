@@ -19,23 +19,63 @@ print _fst , "/" , _scd , "=" , _divide
 print "----------------------------"
 for i = 1 to 5 
 {
-print i * i
+	print i * i
 }
 print "----------------------------"
 if 1 < 2
 {
-print "less"
+	print "less"
 }
 if 3 > 2
 {
-print "more"
+	print "more"
 }
 if 1 != 2
 {
-print "not equals"
+	print "not equals"
 }
 if 1 == 1
 {
-print "equals"
+	print "equals"
 }
 print "----------------------------"
+if 1 != 1
+{
+	if 1 == 1
+	{
+		print 1
+	}
+}
+else
+{
+	print 0
+}
+print "----------------------------"
+for i = 1 to 10 
+{
+	half_i = i / 2
+	if half_i * 2 == i
+	{
+		print i , " even"
+	}
+	else
+	{
+		print i , " odd"
+	}
+}
+print "----------------------------"
+print "write num for facrorial"
+scan num
+if num == 0
+{
+	print "0!=" , 1
+}
+else
+{
+	factorial = 1
+	for i = 1 to num
+	{
+		factorial = factorial * i
+	}
+	print num , "!=" , factorial
+}

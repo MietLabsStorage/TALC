@@ -41,13 +41,18 @@ namespace Interpreter
                     id++;
                     If(code, ref id);
                     break;
+                case "else":
+                    Else(code, ref id);
+                    break;
                 default:
-                    //assign
-                    Assign(code, ref id);
+                    if (IsIdentifier(code[id]))
+                    {
+                        Assign(code, ref id);
+                    }
                     break;
             }
 
-            if (isLoop)
+            if (id < code.Count && code[id] == "}")
             {
                 return null;
             }
@@ -63,6 +68,28 @@ namespace Interpreter
         {
             Console.WriteLine(PrintEnd(code, ref id));
             id++;
+            return null;
+        }
+
+        public static string Else(List<string> code, ref int id)
+        {
+            id = id + 1; // scip {
+            if (id < code.Count && code[id] != "{")
+            {
+                throw new Exception($"Not know operation {code[id - 1]} {code[id]}");
+            }
+
+            id++;
+            if (id < code.Count)
+            {
+                Statement(code, ref id, true);
+            }
+
+            if (id < code.Count && code[id] != "}")
+            {
+                throw new Exception($"Not know operation {code[id - 1]} {code[id]}");
+            }
+
             return null;
         }
 
@@ -88,6 +115,29 @@ namespace Interpreter
                     throw new Exception($"Not know operation {code[id - 1]} {code[id]}");
                 }
 
+                if (id + 1 < code.Count && code[id + 1] == "else")
+                {
+                    id = id + 1; // scip else
+                    id = id + 1; // scip {
+                    if (id < code.Count && code[id] != "{")
+                    {
+                        throw new Exception($"Not know operation {code[id - 1]} {code[id]}");
+                    }
+                    int count = 1;
+                    while (count != 0)
+                    {
+                        id++;
+                        if (code[id] == "{")
+                        {
+                            count++;
+                        }
+                        if (code[id] == "}")
+                        {
+                            count--;
+                        }
+                    }
+                }
+
             }
             else
             {
@@ -108,7 +158,12 @@ namespace Interpreter
                     {
                         count--;
                     }
-                }                
+                }
+                id = id + 1;
+                if (id < code.Count && code[id] == "else")
+                {
+                    Else(code, ref id);
+                }
             }
             id++;
             return null;
