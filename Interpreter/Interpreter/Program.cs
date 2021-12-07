@@ -64,8 +64,16 @@ namespace Interpreter
             }
 
             int id = 0;
-            Interpreter.Program(code, ref id);
-
+            try
+            {
+                Interpreter.Program(code, ref id);
+            }
+            catch(Exception e)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(e.Message);
+                Console.ForegroundColor = ConsoleColor.White;
+            }
         }
     }
 }
