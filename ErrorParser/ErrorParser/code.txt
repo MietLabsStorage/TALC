@@ -1,11 +1,12 @@
 void main ( ) 
 { 
-	if ( aa < bfe ) 
+	for ( void ququruza ; aa == ququruza ; ) 
 	{
-		if ( void ququruza ; aa == ququruza ; )
+		if ( void ququruza ; aa == ququruza )
 		{
-			for ( 28 != qu ) { return 127 ; }
+			if ( 28 != qu ) { return 127 ; }
 		}
 	} 
+	}
 	int a ;
 }

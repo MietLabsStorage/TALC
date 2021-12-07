@@ -434,6 +434,7 @@ namespace ErrorParser
                 Input = codeSymbols.Aggregate((a, b) => $"{a}{b}").Substring(i),
                 AddInfo = ""
             });
+            var input = new List<string>(codeSymbols);
             do
             {
                 if (i >= codeSymbols.Count)
@@ -447,24 +448,26 @@ namespace ErrorParser
                         _history.Add(new History
                         {
                             Stack = stack.Aggregate((a, b) => $"{a}{b}"),
-                            Input = codeSymbols.Aggregate((a, b) => $"{a}{b}").Substring(i),
+                            Input = input.Aggregate((a, b) => $"{a}{b}"),
                             AddInfo = ""
                         });
                         stack.RemoveAt(stack.Count - 1);
                         i++;
+                        input.RemoveAt(0);
                     }
                     else
                     {
                         _history.Add(new History
                         {
                             Stack = stack.Aggregate((a, b) => $"{a}{b}"),
-                            Input = codeSymbols.Aggregate((a, b) => $"{a}{b}").Substring(i),
+                            Input = input.Aggregate((a, b) => $"{a}{b}"),
                             AddInfo = $"scip {codeSymbols[i]}"
                         });
                         //throw new Exception();
                         _errors.Add($"in {i} expected {stack.Last()} but actual is {codeSymbols[i]}");
                         stack.RemoveAt(stack.Count - 1);
                         i++;
+                        input.RemoveAt(0);
                         Console.WriteLine(_errors.Last());
                     }
                 }
@@ -489,7 +492,7 @@ namespace ErrorParser
                         _history.Add(new History
                         {
                             Stack = stack.Aggregate((a, b) => $"{a}{b}"),
-                            Input = codeSymbols.Aggregate((a, b) => $"{a}{b}").Substring(i),
+                            Input = input.Aggregate((a, b) => $"{a}{b}"),
                             AddInfo = $""
                         });
                     }
@@ -515,29 +518,33 @@ namespace ErrorParser
                             _history.Add(new History
                             {
                                 Stack = stack.Aggregate((a, b) => $"{a}{b}"),
-                                Input = codeSymbols.Aggregate((a, b) => $"{a}{b}").Substring(i),
+                                Input = input.Aggregate((a, b) => $"{a}{b}"),
                                 AddInfo = $"scip {codeSymbols[i]}"
                             });
                             i++;
-                            if(i >= codeSymbols.Count)
+                            input.RemoveAt(0);
+                            if (i >= codeSymbols.Count)
                             {
                                 break;
                             }
                             synch = synchTokens.Contains(codeSymbols[i]);
                         } while (!synch);
-                        _history.Add(new History
+                        if(i < codeSymbols.Count)
                         {
-                            Stack = stack.Aggregate((a, b) => $"{a}{b}"),
-                            Input = codeSymbols.Aggregate((a, b) => $"{a}{b}").Substring(i),
-                            AddInfo = $"synch with {codeSymbols[i]}"
-                        });
+                            _history.Add(new History
+                            {
+                                Stack = stack.Aggregate((a, b) => $"{a}{b}"),
+                                Input = input.Count != 0 ? input.Aggregate((a, b) => $"{a}{b}") : "",
+                                AddInfo = $"synch with {codeSymbols[i]}"
+                            });
+                        }
                     }
                 }
             } while (stack.Last() != Eof.ToString());
 
             if(i != codeSymbols.Count)
             {
-                _errors.Add($"End of code but find any symbols: \'{codeSymbols.Aggregate((a, b) => $"{a}{b}").Substring(i)}\'");
+                _errors.Add($"End of code but find any symbols: \'{input.Aggregate((a, b) => $"{a}{b}")}\'");
                 Console.WriteLine(_errors.Last());
             }
 
