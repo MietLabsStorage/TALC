@@ -1,56 +1,3 @@
-print "5 * 6" , " = " , 5 * 6
-print "30 / 6" , " = " , 30 / 6
-print "ququruza " , 125
-print "difficult " , 2 + 2 * 2
-print "difficult " , 2 - 2 / 2 , " wow!"
-print "----------------------------"
-print "write first num"
-scan _fst
-print "write first num"
-scan _scd
-_sum = _fst + _scd
-_subscribe = _fst - _scd
-_multiply = _fst * _scd
-_divide = _fst / _scd
-print _fst , "+" , _scd , "=" , _sum
-print _fst , "-" , _scd , "=" , _subscribe
-print _fst , "*" , _scd , "=" , _multiply
-print _fst , "/" , _scd , "=" , _divide
-print "----------------------------"
-for i = 1 to 5 
-{
-	print i * i
-}
-print "----------------------------"
-if 1 < 2
-{
-	print "less"
-}
-if 3 > 2
-{
-	print "more"
-}
-if 1 != 2
-{
-	print "not equals"
-}
-if 1 == 1
-{
-	print "equals"
-}
-print "----------------------------"
-if 1 != 1
-{
-	if 1 == 1
-	{
-		print 1
-	}
-}
-else
-{
-	print 0
-}
-print "----------------------------"
 for i = 1 to 10 
 {
 	half_i = i / 2
@@ -63,19 +10,15 @@ for i = 1 to 10
 		print i , " odd"
 	}
 }
-print "----------------------------"
-print "write num for facrorial"
-scan num
-if num == 0
+for i = 10 downto 1 
 {
-	print "0!=" , 1
-}
-else
-{
-	factorial = 1
-	for i = 1 to num
+	half_i = i / 2
+	if half_i * 2 == i
 	{
-		factorial = factorial * i
+		print i , " even"
 	}
-	print num , "!=" , factorial
+	else
+	{
+		print i , " odd"
+	}
 }

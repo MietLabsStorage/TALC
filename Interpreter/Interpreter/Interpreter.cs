@@ -209,6 +209,7 @@ namespace Interpreter
 
         public static string For(List<string> code, ref int id)
         {
+            bool isUp = true;
             var key = code[id];
             string key1 = "", key2 ="";
             id = id + 1; // scip =
@@ -223,10 +224,20 @@ namespace Interpreter
             }
 
             id = id + 1; // scip to
-            if (id < code.Count && code[id] != "to")
+            if (id < code.Count && !(code[id] == "to" || code[id] == "downto"))
             {
                 throw new Exception($"Not know operation {code[id - 1]}{code[id]}");
             }
+
+            if(code[id] == "to")
+            {
+                isUp = true;
+            }
+            if (code[id] == "downto")
+            {
+                isUp = false;
+            }
+
             if (id + 1 < code.Count)
             {
                 id++;
@@ -242,19 +253,39 @@ namespace Interpreter
             int index = id + 1;
             if(index < code.Count)
             {
-                for (int i = int.Parse(key1); i <= int.Parse(key2); i++)
+                if (isUp)
                 {
-                    id = index;
-                    if (valuesTable.ContainsKey(key))
+                    for (int i = int.Parse(key1); i <= int.Parse(key2); i++)
                     {
-                        valuesTable[key] = i.ToString();
+                        id = index;
+                        if (valuesTable.ContainsKey(key))
+                        {
+                            valuesTable[key] = i.ToString();
+                        }
+                        else
+                        {
+                            valuesTable.Add(key, i.ToString());
+                        }
+                        Statement(code, ref id, true);
                     }
-                    else
-                    {
-                        valuesTable.Add(key, i.ToString());
-                    }
-                    Statement(code, ref id, true);
                 }
+                else
+                {
+                    for (int i = int.Parse(key1); i >= int.Parse(key2); i--)
+                    {
+                        id = index;
+                        if (valuesTable.ContainsKey(key))
+                        {
+                            valuesTable[key] = i.ToString();
+                        }
+                        else
+                        {
+                            valuesTable.Add(key, i.ToString());
+                        }
+                        Statement(code, ref id, true);
+                    }
+                }
+
             }
 
             if (id < code.Count && code[id] != "}")

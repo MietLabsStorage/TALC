@@ -1,6 +1,6 @@
 <program>:<type>'main ''( '') ''{ '<statement>'} '
 <type>:'int '|'bool '|'void '
-<statement>:$|<declaration>'; '|'{ '<statement>'} '|<for><statement>|<if><statement>|<return>
+<statement>:$|<declaration>'; '|'{ '<statement>'} '|<for><statement>|<return>|<if><statement><else>
 <declaration>:<type><identifier><assign>
 <identifier>:<character><id_end>
 <character>:'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h'|'i'|'j'|'k'|'l'|'m'|'n'|'o'|'p'|'q'|'r'|'s'|'t'|'u'|'v'|'w'|'x'|'y'|'z'|'A'|'B'|'C'|'D'|'E'|'F'|'G'|'H'|'I'|'J'|'K'|'L'|'M'|'N'|'O'|'P'|'Q'|'R'|'S'|'T'|'U'|'V'|'W'|'X'|'Y'|'Z'|'_'
@@ -15,3 +15,4 @@
 <relop>:'< '|'> '|'== '|'!= '
 <if>:'if ''( '<bool_expression>') '
 <return>:'return '<number>'; '
+<else>:$|'else '<statement>

@@ -1,12 +1,9 @@
 void main ( ) 
 { 
-	for ( void ququruza ; aa == ququruza ; ) 
-	{
-		if ( void ququruza ; aa == ququruza )
-		{
-			if ( 28 != qu ) { return 127 ; }
-		}
+	if ( a < b ) { 
+		return 1 ;
 	} 
-	}
-	int a ;
-}
+	else { 
+		return 0 ; 
+	} 
+} 
